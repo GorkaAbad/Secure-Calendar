@@ -1,13 +1,26 @@
 import 'package:calendar/main.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:local_auth/local_auth.dart';
 import 'Task.dart';
+
+List<Task> lis = [
+  Task(3, "name1", "description", 3, 4, "color", true),
+  Task(3, "name", "description", 3, 4, "color", false),
+  Task(3, "name", "description", 3, 4, "color", true),
+  Task(3, "name", "description", 3, 4, "color", true),
+  Task(3, "name", "description", 3, 4, "color", true),
+  Task(3, "name", "description", 3, 4, "color", false),
+  Task(3, "name", "description", 3, 4, "color", true),
+  Task(3, "name", "description", 3, 4, "color", true),
+  Task(3, "name", "description", 3, 4, "color", true),
+  Task(3, "name", "description", 3, 4, "color", true),
+];
+double _paddingTop = 20;
 
 void main() {
   runApp(MyApp());
@@ -36,64 +49,63 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Widget> listTask = [];
 
   void getTask() {
-    List<Task> lis = [
-      Task(3, "name", "description", 3, 4, "color"),
-      Task(4, "name2", "description", 3, 4, "color"),
-      Task(4, "name2", "description", 3, 4, "color"),
-      Task(4, "name2", "description", 3, 4, "color"),
-      Task(4, "name2", "description", 3, 4, "color"),
-      Task(4, "name2", "description", 3, 4, "color"),
-      Task(4, "name2", "description", 3, 4, "color"),
-      Task(4, "name3", "description", 3, 4, "color"),
-      Task(4, "name2", "description", 3, 4, "color"),
-      Task(4, "name2", "description", 3, 4, "color"),
-      Task(4, "name2", "description", 3, 4, "color"),
-      Task(4, "name2", "description", 3, 4, "color"),
-      Task(4, "name5", "description", 3, 4, "color"),
-    ];
-
     List<Widget> lisItem = [];
 
     lis.forEach((task) {
-      lisItem.add(InkWell(
-        onTap: () {
-          print("aswsa" + task.name);
-        },
-        child: Container(
-          padding: EdgeInsets.only(top: 20),
-          child: Row(
-            children: [
-              Icon(
-                Icons.check_circle,
-                color: Colors.green,
+      IconData icon;
+      MaterialColor colorIcon;
+
+      if (task.dateStart > task.dateEnd || task.done) {
+        icon = Icons.check_circle;
+        colorIcon = Colors.green;
+      } else {
+        icon = Icons.access_time;
+        colorIcon = Colors.deepOrange;
+      }
+
+      lisItem.add(Container(
+        padding: EdgeInsets.only(top: 20),
+        child: Row(
+          children: [
+            InkWell(
+              child: Icon(
+                icon,
+                color: colorIcon,
               ),
-              Padding(
-                padding: EdgeInsets.only(left: 10),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Task " + task.name,
-                    style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 5),
-                  ),
-                  Text(
-                    "Description of the task " + task.name,
-                    style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.white),
-                  ),
-                ],
-              )
-            ],
-          ),
+              onTap: () {
+                setState(() {
+                  task.done = !task.done;
+                  task.markDone();
+                  getTask();
+                });
+              },
+            ),
+            Padding(
+              padding: EdgeInsets.only(left: 10),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Task " + task.name,
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 5),
+                ),
+                Text(
+                  "Description of the task " + task.name,
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.white),
+                ),
+              ],
+            )
+          ],
         ),
       ));
 
@@ -109,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
     getTask();
     _controller = CalendarController();
     _scrollController.addListener(() {
-      getTask();
+      //getTask();
     });
   }
 
@@ -165,48 +177,62 @@ Safe Area
                 ),
                 calendarController: _controller),
             Padding(
-              padding: EdgeInsets.only(top: 20),
+              padding: EdgeInsets.only(top: _paddingTop),
             ),
             Expanded(
-              child: Container(
-                padding: EdgeInsets.only(left: 30),
-                height: MediaQuery.of(context).size.height,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(50),
-                        topRight: Radius.circular(50)),
-                    color: Color(color)),
-                child: Stack(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.only(top: 50),
-                      child: Text(
-                        "Today",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          fontSize: 30,
+              child: GestureDetector(
+                onPanUpdate: (tapInfo) {
+                  print(tapInfo.localPosition.dy);
+                  print(_paddingTop);
+                  if (tapInfo.localPosition.dy < _paddingTop + 5 &&
+                      tapInfo.localPosition.dy + 5 >= _paddingTop) {
+                    setState(() {
+                      if (tapInfo.localPosition.dy > 20 &&
+                          tapInfo.globalPosition.dy <
+                              MediaQuery.of(context).size.height * 0.965) {
+                        _paddingTop = tapInfo.localPosition.dy;
+                      }
+                    });
+                  }
+                },
+                child: Container(
+                  padding: EdgeInsets.only(left: 30),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(50),
+                          topRight: Radius.circular(50)),
+                      color: Color(color)),
+                  child: Stack(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.only(top: 50),
+                        child: Text(
+                          "Today",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 30,
+                          ),
                         ),
                       ),
-                    ),
-                    Container(
-                      height: MediaQuery.of(context).size.height,
-                      padding: EdgeInsets.only(top: 85),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        controller: _scrollController,
-                        itemCount: listTask.length,
-                        itemBuilder: (context, index) {
-                          return Container(
-                            child: listTask[index],
-                          );
-                        },
+                      Container(
+                        height: MediaQuery.of(context).size.height,
+                        padding: EdgeInsets.only(top: 85),
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          physics: BouncingScrollPhysics(),
+                          controller: _scrollController,
+                          itemCount: listTask.length,
+                          itemBuilder: (context, index) {
+                            return listTask[index];
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -79,7 +79,8 @@ void insertValues() async {
       "Description of the task 1",
       DateTime.now().millisecondsSinceEpoch,
       DateTime.now().millisecondsSinceEpoch,
-      "Red"));
+      "Red",
+      true));
 }
 
 void resetValues() {

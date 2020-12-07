@@ -1,33 +1,40 @@
 class Task {
   final int id;
-  final String name;
-  final String description;
-  final int dateStart;
-  final int dateEnd;
-  final String color;
+  String name;
+  String description;
+  int dateStart;
+  int dateEnd;
+  String color;
+  bool done;
 
   Task(this.id, this.name, this.description, this.dateStart, this.dateEnd,
-      this.color);
+      this.color, this.done);
 
-  factory Task.fromMap(Map<String, dynamic> data){
+  factory Task.fromMap(Map<String, dynamic> data) {
     return Task(
-        data['id'],
-        data['name'],
-        data['description'],
-        data['dateStart'],
-        data['dateEnd'],
-        data['color']
+      data['id'],
+      data['name'],
+      data['description'],
+      data['dateStart'],
+      data['dateEnd'],
+      data['color'],
+      data['done'],
     );
   }
 
   Map<String, dynamic> toMap() {
-    return{
+    return {
       "id": id,
       "name": name,
       "description": description,
       "dateStart": dateStart,
       "dateEnd": dateEnd,
-      "color": color
+      "color": color,
+      "done": done
     };
+  }
+
+  void markDone() {
+    //TODO: Save the new state to the database
   }
 }
