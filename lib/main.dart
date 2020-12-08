@@ -4,9 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:local_auth/local_auth.dart';
 import 'Task.dart';
+import 'package:getwidget/getwidget.dart';
 
 List<Task> lis = [
   Task(3, "name1", "description", 3, 4, "color", true),
@@ -36,14 +38,29 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class Bottomsheep extends StatefulWidget {
+  @override
+  _Bottomsheep createState() => _Bottomsheep();
+}
+
+class _Bottomsheep extends State<Bottomsheep> {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    throw UnimplementedError();
+  }
+}
+
 class MyHomePage extends StatefulWidget {
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+//TODO: No funciona la lista, o bien por el expanded o el row, ninguna solucion todavia
 class _MyHomePageState extends State<MyHomePage> {
   CalendarController _controller;
   ScrollController _scrollController = ScrollController();
+  ScrollController _scrollController2 = ScrollController();
   final color = 0xff30384c;
 
   List<Widget> listTask = [];
@@ -63,52 +80,33 @@ class _MyHomePageState extends State<MyHomePage> {
         colorIcon = Colors.deepOrange;
       }
 
-      lisItem.add(Container(
-        padding: EdgeInsets.only(top: 20),
-        child: Row(
-          children: [
-            InkWell(
-              child: Icon(
-                icon,
-                color: colorIcon,
-              ),
-              onTap: () {
-                setState(() {
-                  task.done = !task.done;
-                  task.markDone();
-                  getTask();
-                });
-              },
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 10),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Task " + task.name,
-                  style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 5),
-                ),
-                Text(
-                  "Description of the task " + task.name,
-                  style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.white),
-                ),
-              ],
-            )
-          ],
+      lisItem.add(GFListTile(
+        titleText: 'Title ' + task.name,
+        subtitleText: 'Lorem ipsum dolor sit amet, consectetur adipiscing',
+        enabled: false,
+        selected: false,
+        icon: IconButton(
+          icon: Icon(
+            icon,
+            color: colorIcon,
+            size: 25,
+          ),
+          onPressed: () {
+            Fluttertoast.showToast(
+              msg: "Updating state...",
+              toastLength: Toast.LENGTH_SHORT,
+              timeInSecForIosWeb: 1,
+            );
+            setState(() {
+              //Update database
+              task.done = !task.done;
+              task.markDone();
+              getTask();
+            });
+          },
         ),
+        onTap: () {},
       ));
-
       setState(() {
         listTask = lisItem;
       });
@@ -118,6 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+    print("Init");
     getTask();
     _controller = CalendarController();
     _scrollController.addListener(() {
@@ -142,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
 OR
 Safe Area
    */
-
+  bool isChecked = false;
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -180,23 +179,106 @@ Safe Area
               padding: EdgeInsets.only(top: _paddingTop),
             ),
             Expanded(
+              child: ListView(
+                  scrollDirection: Axis.vertical,
+                  shrinkWrap: true,
+                  controller: _scrollController2,
+                  physics: BouncingScrollPhysics(),
+                  children: <Widget>[
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: BouncingScrollPhysics(),
+                      controller: _scrollController,
+                      itemCount: listTask.length,
+                      itemBuilder: (context, index) {
+                        return listTask[index];
+                      },
+                    ),
+                  ]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/*
+ Scaffold(
+                bottomSheet: GFBottomSheet(
+                  enableExpandableContent: true,
+                  animationDuration: 300,
+                  controller: _controllerBottom,
+                  maxContentHeight: 270,
+                  stickyHeaderHeight: 70,
+                  stickyHeader: Container(
+                    decoration: BoxDecoration(
+                        color: Color(color),
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(50),
+                            topRight: Radius.circular(50)),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black45, blurRadius: 0)
+                        ]),
+                    child: const GFListTile(
+                      title: Text(
+                        "Today",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontSize: 30,
+                        ),
+                      ),
+                    ),
+                  ),
+                  contentBody: Container(
+                    decoration: BoxDecoration(color: Color(color)),
+                    height: 100,
+                    child: ListView(
+                      padding: EdgeInsets.symmetric(horizontal: 15),
+                      shrinkWrap: true,
+                      physics: BouncingScrollPhysics(),
+                      children: [
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: BouncingScrollPhysics(),
+                          controller: _scrollController,
+                          itemCount: listTask.length,
+                          itemBuilder: (context, index) {
+                            return listTask[index];
+                          },
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+ */
+/*
+ Expanded(
               child: GestureDetector(
+                onVerticalDragDown: (details) {
+                  setState(() {
+                    print(containerKey.currentWidget.toString());
+                    //_paddingTop = MediaQuery.of(context).size.height *0.965;
+                  });
+                },
                 onPanUpdate: (tapInfo) {
-                  print(tapInfo.localPosition.dy);
-                  print(_paddingTop);
-                  if (tapInfo.localPosition.dy < _paddingTop + 5 &&
-                      tapInfo.localPosition.dy + 5 >= _paddingTop) {
-                    setState(() {
-                      if (tapInfo.localPosition.dy > 20 &&
-                          tapInfo.globalPosition.dy <
-                              MediaQuery.of(context).size.height * 0.965) {
-                        _paddingTop = tapInfo.localPosition.dy;
-                      }
-                    });
-                  }
+                  print('[*] Local: ' + tapInfo.localPosition.dy.toString());
+                  print('[*] Padding: ' + _paddingTop.toString());
+
+                  setState(() {
+                    if (tapInfo.localPosition.dy > 20 &&
+                        tapInfo.globalPosition.dy <
+                            MediaQuery.of(context).size.height * 0.965) {
+                      _paddingTop = tapInfo.localPosition.dy;
+                    }
+                  });
                 },
                 child: Container(
-                  padding: EdgeInsets.only(left: 30),
+                  padding: EdgeInsets.only(
+                    left: 30,
+                  ),
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(50),
@@ -233,9 +315,4 @@ Safe Area
                 ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+ */
