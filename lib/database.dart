@@ -43,7 +43,7 @@ class DatabaseHelper {
     CREATE TABLE $table ( 
       $columnId INTEGER PRIMARY KEY,$columnName TEXT,
       $columnDescription TEXT,$columnDateStart INTEGER,
-      $columnDateStart INTEGER,$columnColor TEXT,
+      $columnDateEnd INTEGER,$columnColor TEXT,
       $columnDone INTEGER)
     ''');
   }
@@ -53,7 +53,8 @@ class DatabaseHelper {
   // inserted row.
   Future<int> insert(Task task) async {
     Database db = await instance.database;
-    return await db.insert(table, task.toMap());
+    return await db.insert(table, task.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // All of the rows are returned as a list of maps, where each map is
@@ -72,7 +73,8 @@ class DatabaseHelper {
   // raw SQL commands. This method uses a raw query to give the row count.
   Future<int> queryRowCount() async {
     Database db = await instance.database;
-    return Sqflite.firstIntValue(await db.rawQuery('SELECT COUNT(*) FROM $table'));
+    return Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) FROM $table'));
   }
 
   // We are assuming here that the id column in the map is set. The other
@@ -91,9 +93,13 @@ class DatabaseHelper {
     int id = task.id;
     return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
   }
+
+  void resetValues() {
+    getDatabasesPath().then((value) => {
+          File(join(value, _databaseName)).delete(),
+        });
+  }
 }
-
-
 
 /*
 class DatabaseHelper {

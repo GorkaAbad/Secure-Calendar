@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'package:flutter/material.dart';
@@ -8,19 +9,9 @@ import 'package:local_auth/local_auth.dart';
 import 'Task.dart';
 import 'package:getwidget/getwidget.dart';
 import 'database.dart';
+import 'TaskDetails.dart';
 
-List<Task> lis = [
-  Task(3, "name1", "description", 3, 4, "color", true),
-  Task(3, "name", "description", 3, 4, "color", false),
-  Task(3, "name", "description", 3, 4, "color", true),
-  Task(3, "name", "description", 3, 4, "color", true),
-  Task(3, "name", "description", 3, 4, "color", true),
-  Task(3, "name", "description", 3, 4, "color", false),
-  Task(3, "name", "description", 3, 4, "color", true),
-  Task(3, "name", "description", 3, 4, "color", true),
-  Task(3, "name", "description", 3, 4, "color", true),
-  Task(3, "name", "description", 3, 4, "color", true),
-];
+List<Task> lis = [];
 
 void main() {
   runApp(MyApp());
@@ -42,15 +33,63 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  //Controllers
   CalendarController _controller;
   ScrollController _scrollController = ScrollController();
   ScrollController _scrollController2 = ScrollController();
+
+  //Database
   final dbHelper = DatabaseHelper.instance;
 
-  final color = 0xff30384c;
-
+  //Variables
   List<Widget> listTask = [];
+  final color = 0xff30384c;
+  bool isChecked = false;
 
+  //Functions
+
+  /*
+  Gets every single task from the database and add it to the global variables "lis".
+  Note that this process is done asynchronously, so it could happen not to have
+  ready the task when booting the app.
+   */
+  void getTasksFromDB() {
+    dbHelper.queryAllRows().then((tasks) => {
+          tasks.forEach((task) {
+            lis.add(task);
+          }),
+          getTask()
+        });
+  }
+
+  void initialiseDB() {
+    List<Task> lisIni = [
+      Task(DateTime.now().millisecondsSinceEpoch, "name1", "description", 3, 4,
+          "color", true),
+      Task(DateTime.now().millisecondsSinceEpoch + 32, "name1", "description",
+          3, 4, "color", true),
+      Task(DateTime.now().millisecondsSinceEpoch + 2, "name1", "description", 3,
+          4, "color", true),
+      Task(DateTime.now().millisecondsSinceEpoch + 5, "name1", "description", 3,
+          4, "color", true),
+      Task(DateTime.now().millisecondsSinceEpoch + 6, "name1", "description", 3,
+          4, "color", true),
+      Task(DateTime.now().millisecondsSinceEpoch + 16, "name1", "description",
+          3, 4, "color", true)
+    ];
+
+    //dbHelper.resetValues();
+
+    /* lisIni.forEach((task) {
+      dbHelper.insert(task);
+    });*/
+    getTasksFromDB();
+  }
+
+  /*
+  Creates Widgets from the pre-loaded Task list and stores them at LisItem.
+  After that values are dumped into lisTask, that keeps the state of them.
+   */
   void getTask() {
     List<Widget> lisItem = [];
 
@@ -66,44 +105,57 @@ class _MyHomePageState extends State<MyHomePage> {
         colorIcon = Colors.deepOrange;
       }
 
-      lisItem.add(GFListTile(
-        titleText: 'Title ' + task.name,
-        subtitleText: 'Lorem ipsum dolor sit amet, consectetur adipiscing',
-        enabled: false,
-        selected: false,
-        icon: IconButton(
-          icon: Icon(
-            icon,
-            color: colorIcon,
-            size: 25,
+      lisItem.add(Hero(
+        tag: task.id,
+        child: Material(
+          child: GFListTile(
+            titleText: task.name,
+            padding: EdgeInsets.only(top: 0),
+            subtitleText: task.description,
+            enabled: true,
+            selected: false,
+            icon: IconButton(
+              icon: Icon(
+                icon,
+                color: colorIcon,
+                size: 25,
+              ),
+              onPressed: () {
+                //Update database
+                task.done = !task.done;
+                dbHelper.update(task);
+                Fluttertoast.showToast(
+                  msg: "Updating state...",
+                  toastLength: Toast.LENGTH_SHORT,
+                  timeInSecForIosWeb: 1,
+                );
+                setState(() {
+                  getTask();
+                });
+              },
+            ),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(
+                builder: (context) => new TaskDetails(task)
+              ));
+            },
           ),
-          onPressed: () {
-            Fluttertoast.showToast(
-              msg: "Updating state...",
-              toastLength: Toast.LENGTH_SHORT,
-              timeInSecForIosWeb: 1,
-            );
-            setState(() {
-              //Update database
-              task.done = !task.done;
-              task.markDone();
-              getTask();
-            });
-          },
         ),
-        onTap: () {},
       ));
-      setState(() {
-        listTask = lisItem;
-      });
+    });
+    setState(() {
+      listTask = lisItem;
     });
   }
 
+  //Overrides
   @override
   void initState() {
+    //TODO:
+    //https://stackoverflow.com/questions/43877288/how-to-hide-android-statusbar-in-flutter
+    SystemChrome.setEnabledSystemUIOverlays([]);
     super.initState();
-    print("Init");
-    getTask();
+    initialiseDB();
     _controller = CalendarController();
     _scrollController.addListener(() {
       //getTask();
@@ -127,7 +179,7 @@ class _MyHomePageState extends State<MyHomePage> {
 OR
 Safe Area
    */
-  bool isChecked = false;
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(

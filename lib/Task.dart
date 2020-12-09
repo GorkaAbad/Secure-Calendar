@@ -18,11 +18,14 @@ class Task {
       data['dateStart'],
       data['dateEnd'],
       data['color'],
-      data['done'],
+      data['done'] == 1,
     );
   }
 
   Map<String, dynamic> toMap() {
+    int aux;
+    this.done ? aux = 1 : aux = 0;
+
     return {
       "id": id,
       "name": name,
@@ -30,11 +33,8 @@ class Task {
       "dateStart": dateStart,
       "dateEnd": dateEnd,
       "color": color,
-      "done": done
+      "done": aux
     };
   }
 
-  void markDone() {
-    //TODO: Save the new state to the database
-  }
 }
