@@ -1,3 +1,4 @@
+import 'package:calendar/CreateTask.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:getwidget/getwidget.dart';
@@ -27,19 +28,25 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
-  Map<DateTime, List> _events;
-  List _selectedDayEvents;
+  //Controllers
   AnimationController _animationController;
   CalendarController _calendarController;
+
+  //Variables
+  Map<DateTime, List> _events;
+  List _selectedDayEvents;
+  DateTime _selectedDay = DateTime.now();
+
+  //Database instance
   final dbHelper = DatabaseHelper.instance;
 
+  //Override methods
   @override
   void initState() {
     super.initState();
-    final _selectedDay = DateTime.now();
 
     _events = {};
-    _selectedDayEvents = _events[_selectedDay] ?? [];
+    _selectedDayEvents = _events[DateTime.now()] ?? [];
     _calendarController = CalendarController();
 
     getEvents();
@@ -59,9 +66,12 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  //Methods
+
   void _onDaySelected(DateTime day, List events, List holidays) {
     print('CALLBACK: _onDaySelected');
     setState(() {
+      _selectedDay = day;
       _selectedDayEvents = events;
     });
   }
@@ -80,6 +90,16 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add),
+          heroTag: 1,
+          onPressed: () {
+            print(_selectedDay.day);
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => new CreateTask(_selectedDay),)
+            );
+          },
+        ),
         body: Column(
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
@@ -121,47 +141,47 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       physics: BouncingScrollPhysics(),
       children: _selectedDayEvents
           .map((task) => Hero(
-        tag: task.id,
-        child: Material(
-          child: GFListTile(
-            titleText: task.name,
-            padding: EdgeInsets.only(top: 0),
-            subtitleText: task.description,
-            enabled: true,
-            selected: false,
-            icon: IconButton(
-              icon: Icon(
-                task.dateStart > task.dateEnd || task.done
-                    ? Icons.check_circle
-                    : Icons.access_time_outlined,
-                color: task.dateStart > task.dateEnd || task.done
-                    ? Colors.green
-                    : Colors.deepOrange,
-                size: 25,
-              ),
-              onPressed: () {
-                //Update database
-                task.done = !task.done;
-                dbHelper.update(task);
+                tag: task.id,
+                child: Material(
+                  child: GFListTile(
+                    titleText: task.name,
+                    padding: EdgeInsets.only(top: 0),
+                    subtitleText: task.description,
+                    enabled: true,
+                    selected: false,
+                    icon: IconButton(
+                      icon: Icon(
+                        task.dateStart > task.dateEnd || task.done
+                            ? Icons.check_circle
+                            : Icons.access_time_outlined,
+                        color: task.dateStart > task.dateEnd || task.done
+                            ? Colors.green
+                            : Colors.deepOrange,
+                        size: 25,
+                      ),
+                      onPressed: () {
+                        //Update database
+                        task.done = !task.done;
+                        dbHelper.update(task);
 
-                Fluttertoast.showToast(
-                  msg: "Updating state...",
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 1,
-                );
+                        Fluttertoast.showToast(
+                          msg: "Updating state...",
+                          toastLength: Toast.LENGTH_SHORT,
+                          timeInSecForIosWeb: 1,
+                        );
 
-                setState(() {});
-              },
-            ),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => new TaskDetails(task)));
-            },
-          ),
-        ),
-      ))
+                        setState(() {});
+                      },
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => new TaskDetails(task)));
+                    },
+                  ),
+                ),
+              ))
           .toList(),
     );
   }
@@ -195,8 +215,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     print("Fetching events...");
     dbHelper.queryAllRows().then(
           (tasks) => setState(() {
-        _events = convertTaskToEvent(tasks);
-      }),
-    );
+            _events = convertTaskToEvent(tasks);
+          }),
+        );
   }
 }
