@@ -22,8 +22,8 @@ class _TaskDetailsState extends State<TaskDetails> {
           tag: widget.task.id,
           child: Material(
             child: GFListTile(
-              titleText: widget.task.name,
-              subtitleText: widget.task.description,
+              titleText: DateTime.fromMillisecondsSinceEpoch(widget.task.dateStart).toString(),
+              subtitleText: DateTime.fromMillisecondsSinceEpoch(widget.task.dateEnd).toString(),
             ),
           ),
         )

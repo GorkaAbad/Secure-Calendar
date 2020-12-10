@@ -94,6 +94,24 @@ class DatabaseHelper {
     return await db.delete(table, where: '$columnId = ?', whereArgs: [id]);
   }
 
+  Future<List<Task>> queryTodayTask(int day) async {
+    Database db = await instance.database;
+    List<Map<String, dynamic>> lis = await db.query(table,
+        columns: null,
+        where: '$columnDateStart <= ? AND $columnDateEnd >= ?',
+        whereArgs: [day, day]);
+    List<Task> task = [];
+    print(day);
+    lis.forEach((element) {
+      print(element);
+      print(element['dateStart']<=day);
+      print(element['dateEnd']>=day);
+      task.add(Task.fromMap(element));
+    });
+    return task;
+  }
+
+  //Deletes the database. For development purposes.
   void resetValues() {
     getDatabasesPath().then((value) => {
           File(join(value, _databaseName)).delete(),
