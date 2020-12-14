@@ -90,14 +90,26 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
-          heroTag: 1,
+        floatingActionButton: FloatingActionButton.extended(
+          label: Text("Add a new task"),
+          icon: Icon(Icons.add),
           onPressed: () {
-            print(_selectedDay.day);
-            Navigator.push(context,
-                MaterialPageRoute(builder: (context) => new CreateTask(_selectedDay),)
-            );
+            showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(30))),
+                enableDrag: true,
+                builder: (BuildContext cont) {
+                  return (CreateTask(_selectedDay));
+                }).then((value) => {
+                  setState(() {
+                    //This should not be the most efficient approach.
+                    //Adding solely the event to _events could improve efficiency.
+                    getEvents();
+                  })
+                });
           },
         ),
         body: Column(
@@ -116,6 +128,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   // Simple TableCalendar configuration (using Styles)
+
   Widget _buildTableCalendar() {
     return TableCalendar(
       calendarController: _calendarController,
