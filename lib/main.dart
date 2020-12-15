@@ -182,7 +182,56 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                   child: GFListTile(
                     titleText: task.name,
                     padding: EdgeInsets.only(top: 0),
-                    subtitleText: task.description,
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          task.description,
+                          style: TextStyle(
+                            color: Colors.black54,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              DateTime.fromMillisecondsSinceEpoch(
+                                          task.dateStart)
+                                      .hour
+                                      .toString() +
+                                  ":" +
+                                  DateTime.fromMillisecondsSinceEpoch(
+                                          task.dateStart)
+                                      .minute
+                                      .toString(),
+                              style: TextStyle(
+                                color: Colors.black54,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            //If the beginning date, is the same as the ending one,
+                            //only show the first date.
+                            Text(
+                              task.dateStart == task.dateEnd
+                                  ? ""
+                                  : DateTime.fromMillisecondsSinceEpoch(
+                                              task.dateEnd)
+                                          .hour
+                                          .toString() +
+                                      ":" +
+                                      DateTime.fromMillisecondsSinceEpoch(
+                                              task.dateEnd)
+                                          .minute
+                                          .toString(),
+                              style: TextStyle(
+                                color: Colors.black54,
+                              ),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
                     enabled: true,
                     selected: false,
                     icon: IconButton(

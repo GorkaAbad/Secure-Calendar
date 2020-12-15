@@ -62,7 +62,8 @@ class DatabaseHelper {
   Future<List<Task>> queryAllRows() async {
     Database db = await instance.database;
     List<Task> tasks = [];
-    List<Map<String, dynamic>> lis = await db.query(table);
+    List<Map<String, dynamic>> lis =
+        await db.query(table, orderBy: columnDateStart);
     lis.forEach((element) {
       tasks.add(Task.fromMap(element));
     });
@@ -104,8 +105,8 @@ class DatabaseHelper {
     print(day);
     lis.forEach((element) {
       print(element);
-      print(element['dateStart']<=day);
-      print(element['dateEnd']>=day);
+      print(element['dateStart'] <= day);
+      print(element['dateEnd'] >= day);
       task.add(Task.fromMap(element));
     });
     return task;

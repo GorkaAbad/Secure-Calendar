@@ -138,12 +138,8 @@ class _CreateTaskState extends State<CreateTask> {
                           dateEnd.millisecondsSinceEpoch,
                           "blue",
                           false);
-                      dbHelper.insert(aux);
 
-                      print(taskName);
-                      print(description);
-                      print(dateStart);
-                      print(dateEnd);
+                      dbHelper.insert(aux);
 
                       Fluttertoast.showToast(
                         msg: "Task added",
@@ -161,112 +157,3 @@ class _CreateTaskState extends State<CreateTask> {
         ));
   }
 }
-
-/*
-ListView(
-      shrinkWrap: true,
-      padding: EdgeInsets.only(left: 10, right: 30),
-      physics: BouncingScrollPhysics(),
-      children: <Widget>[
-
-        TextFormField(
-          validator: (value) =>
-              value.isEmpty ? 'This value must be filled' : null,
-          onChanged: (name) => {taskName = name},
-          decoration: InputDecoration(
-            labelText: 'Event name',
-            icon: Icon(Icons.calendar_today_rounded),
-          ),
-        ),
-        TextFormField(
-          onChanged: (des) => {description = des},
-          decoration: InputDecoration(
-            labelText: 'Description',
-            icon: Icon(Icons.description_rounded),
-          ),
-        ),
-        TextFormField(
-          decoration: InputDecoration(
-            labelText: 'Start date',
-            icon: Icon(Icons.today_rounded),
-          ),
-          controller: dateControllerStart,
-          onTap: () async {
-            DateTime date = await showDatePicker(
-              context: context,
-              initialDate: DateTime.now(),
-              firstDate: DateTime.now(),
-              lastDate: DateTime(2100),
-            );
-            if (date != null) {
-              TimeOfDay time = await showTimePicker(
-                  context: context, initialTime: TimeOfDay.now());
-              if (time != null) {
-                dateStart = DateTime(
-                    date.year, date.month, date.day, time.hour, time.minute);
-                dateControllerStart.text =
-                    dateStart.toString().substring(0, 16);
-              }
-            }
-          },
-        ),
-        TextFormField(
-          decoration: InputDecoration(
-            labelText: 'End date',
-            icon: Icon(Icons.today_rounded),
-          ),
-          controller: dateControllerEnd,
-          onTap: () async {
-            DateTime date = await showDatePicker(
-              context: context,
-              initialDate: dateStart,
-              firstDate: dateStart,
-              lastDate: DateTime(2100),
-            );
-            if (date != null) {
-              TimeOfDay time = await showTimePicker(
-                  context: context, initialTime: TimeOfDay.now());
-              if (time != null) {
-                dateEnd = DateTime(
-                    date.year, date.month, date.day, time.hour, time.minute);
-                dateControllerEnd.text = dateEnd.toString().substring(0, 16);
-              }
-            }
-          },
-        ),
-        ButtonBar(
-          children: [
-            RaisedButton(
-              child: Text("Save"),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              color: Colors.blue,
-              onPressed: () {
-                /*dbHelper.insert(new Task(
-                    DateTime.now().millisecondsSinceEpoch,
-                    taskName,
-                    description,
-                    dateStart.millisecondsSinceEpoch,
-                    dateEnd.millisecondsSinceEpoch,
-                    "blue",
-                    false));*/
-
-                print(taskName);
-                print(description);
-                print(dateStart);
-                print(dateEnd);
-
-                Fluttertoast.showToast(
-                  msg: "Task added",
-                  toastLength: Toast.LENGTH_SHORT,
-                  timeInSecForIosWeb: 1,
-                );
-
-                //Navigator.pop(context);
-              },
-            )
-          ],
-        ),
-      ],
-    );
- */
