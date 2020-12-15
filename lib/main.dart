@@ -108,6 +108,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                     //This should not be the most efficient approach.
                     //Adding solely the event to _events could improve efficiency.
                     getEvents();
+                    _calendarController.setSelectedDay(_selectedDay,
+                        runCallback: true);
                   })
                 });
           },
@@ -115,10 +117,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
         body: Column(
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
-            // Switch out 2 lines below to play with TableCalendar's settings
-            //-----------------------
             _buildTableCalendar(),
-            // _buildTableCalendarWithBuilders(),
             const SizedBox(height: 8.0),
             Expanded(child: _buildEventList()),
           ],
@@ -150,10 +149,34 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   }
 
   Widget _buildEventList() {
+    print("Building");
     return ListView(
       physics: BouncingScrollPhysics(),
       children: _selectedDayEvents
-          .map((task) => Hero(
+          .map(
+            (task) => Dismissible(
+              key: UniqueKey(),
+              background: Container(color: Colors.red),
+              onDismissed: (direction) {
+                setState(() {
+                  //Steeping removing, prevents from getting the database once again
+
+                  //Removing from the events state
+                  _events.remove(
+                      DateTime.fromMillisecondsSinceEpoch(task.dateStart));
+                  //Removing from the listView
+                  _selectedDayEvents.remove(task);
+                  //Removing from the database
+                  dbHelper.delete(task);
+                  String aux = task.name;
+                  Fluttertoast.showToast(
+                    msg: "$aux deleted",
+                    toastLength: Toast.LENGTH_SHORT,
+                    timeInSecForIosWeb: 1,
+                  );
+                });
+              },
+              child: Hero(
                 tag: task.id,
                 child: Material(
                   child: GFListTile(
@@ -192,9 +215,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                           MaterialPageRoute(
                               builder: (context) => new TaskDetails(task)));
                     },
+                    onLongPress: () {
+                      print("sdad");
+                    },
                   ),
                 ),
-              ))
+              ),
+            ),
+          )
           .toList(),
     );
   }
