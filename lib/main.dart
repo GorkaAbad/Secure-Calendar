@@ -259,13 +259,17 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                       },
                     ),
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => new TaskDetails(task)));
-                    },
-                    onLongPress: () {
-                      print("sdad");
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.vertical(
+                                top: Radius.circular(30))),
+                        enableDrag: true,
+                        builder: (BuildContext cont) {
+                          return (TaskDetails(task));
+                        },
+                      );
                     },
                   ),
                 ),

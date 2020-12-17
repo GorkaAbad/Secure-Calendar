@@ -60,7 +60,7 @@ class _CreateTaskState extends State<CreateTask> {
               ),
               TextFormField(
                 validator: (value) =>
-                    value.isEmpty ? 'This value must be filled' : null,
+                    value.isEmpty ? value = '' : null,
                 onChanged: (des) => {description = des},
                 decoration: InputDecoration(
                   labelText: 'Description',
